@@ -1,4 +1,4 @@
-import UserRepository from "../repoitory/UserRepository";
+import UserRepository from "../repository/UserRepository";
 import * as httpStatus from "../../../config/constants/HttpStatus";
 import UserException from "../exception/UserException";
 import bcrypt from "bcrypt";
