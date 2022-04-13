@@ -9,9 +9,11 @@ class UserService {
   async getByEmail(req) {
     try {
       const { email } = req.params;
+      const { authUser } = req;
       this.validateRequestData(email);
       let user = await UserRepository.getByEmail(email);
       this.valdidateUserNotFound(user);
+      this.validateAuthenticateUser(user, authUser);
 
       return {
         status: httpStatus.SUCCESS,
@@ -82,6 +84,14 @@ class UserService {
   valdidateUserNotFound(user) {
     if (!user) {
       throw new UserException(httpStatus.NOT_FOUND, "User was not found");
+    }
+  }
+  validateAuthenticateUser(user, authUser) {
+    if (!authUser || user.id !== authUser.id) {
+      throw new UserException(
+        httpStatus.FORBIDDEN,
+        "You cannot see this user data."
+      );
     }
   }
 }
