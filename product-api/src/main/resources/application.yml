@@ -10,6 +10,9 @@ spring:
     url: jdbc:postgresql://localhost:5433/product-db
     username: admin
     password: admin
+    initialization-mode: always
+    continue-on-error: true
+    plataform: postgressql
 
   jpa:
     hibernate:
