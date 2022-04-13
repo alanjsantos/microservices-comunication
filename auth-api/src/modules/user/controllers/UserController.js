@@ -1,4 +1,3 @@
-import User from "../model/User";
 import UserService from "../service/UserService";
 
 class UserController {
