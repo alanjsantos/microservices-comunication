@@ -7,12 +7,12 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotBlank;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class CategoryDTO {
+@NoArgsConstructor
+public class SupplierDTO {
 
     private Long id;
 
-    @NotBlank(message = "The category description was not informed.")
-    private String description;
+    @NotBlank(message = "The Supplier description was not informed.")
+    private String name;
 }

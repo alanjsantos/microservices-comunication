@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("api")
+@RequestMapping("api/category")
 public class CategoryController {
 
     @Autowired
@@ -23,7 +23,7 @@ public class CategoryController {
     @Autowired
     private ModelMapper modelMapper;
 
-    @PostMapping("category")
+    @PostMapping
     public ResponseEntity<CategoryDTO> save (@Valid @RequestBody CategoryDTO dto) {
         Category category = service.save(modelMapper.map(dto, Category.class));
 
@@ -36,6 +36,15 @@ public class CategoryController {
                 service.getAll().stream()
                         .map(entity -> modelMapper.map(entity, CategoryDTO.class))
                         .collect(Collectors.toList());
+
         return ResponseEntity.ok().body(body);
+    }
+
+    @GetMapping("{id}")
+    public ResponseEntity<CategoryDTO> getId(@PathVariable Long id) {
+        Category category = service.getById(id);
+        CategoryDTO dto = modelMapper.map(category, CategoryDTO.class);
+
+        return ResponseEntity.ok().body(dto);
     }
 }
