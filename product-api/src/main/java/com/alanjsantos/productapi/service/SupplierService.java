@@ -1,5 +1,6 @@
 package com.alanjsantos.productapi.service;
 
+import com.alanjsantos.productapi.model.Product;
 import com.alanjsantos.productapi.model.Supplier;
 import com.alanjsantos.productapi.repository.SupplierRepository;
 import com.alanjsantos.productapi.service.exception.ObjectNotFoundException;
@@ -27,5 +28,15 @@ public class SupplierService {
 
     public List<Supplier> getAll () {
         return repository.findAll();
+    }
+
+
+    public List<Supplier> getName (String name) {
+        List<Supplier> list = repository.findByNameIgnoreCaseContaining(name);
+        if (list.isEmpty()) {
+            throw new ObjectNotFoundException("This Name -> " + name + " not aready exists in the Database");
+        }
+
+        return list;
     }
 }

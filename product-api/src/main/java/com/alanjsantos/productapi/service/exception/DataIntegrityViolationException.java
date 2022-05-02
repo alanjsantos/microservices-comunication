@@ -8,7 +8,4 @@ public class DataIntegrityViolationException extends RuntimeException{
         super(msg);
     }
 
-    public DataIntegrityViolationException(String msg, Throwable cause){
-        super(msg, cause);
-    }
 }

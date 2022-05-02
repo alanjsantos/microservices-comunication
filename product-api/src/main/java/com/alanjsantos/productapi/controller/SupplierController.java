@@ -1,6 +1,7 @@
 package com.alanjsantos.productapi.controller;
 
 import com.alanjsantos.productapi.model.Supplier;
+import com.alanjsantos.productapi.model.dto.ProductDTO;
 import com.alanjsantos.productapi.model.dto.SupplierDTO;
 import com.alanjsantos.productapi.service.SupplierService;
 import org.modelmapper.ModelMapper;
@@ -47,6 +48,17 @@ public class SupplierController {
 
         return ResponseEntity.ok().body(body);
     }
+
+    @GetMapping("name/{name}")
+    public ResponseEntity<?> getByName(@PathVariable String name) {
+        List<SupplierDTO> body =
+                service.getName(name).stream()
+                        .map(entity -> modelMapper.map(entity, SupplierDTO.class))
+                        .collect(Collectors.toList());
+
+        return ResponseEntity.ok().body(body);
+    }
+
 
 
 }

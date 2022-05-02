@@ -1,12 +1,14 @@
 package com.alanjsantos.productapi.service;
 
-import com.alanjsantos.productapi.model.Category;
 import com.alanjsantos.productapi.model.Product;
-import com.alanjsantos.productapi.model.Supplier;
 import com.alanjsantos.productapi.repository.ProductRepository;
 import com.alanjsantos.productapi.service.exception.DataIntegrityViolationException;
+import com.alanjsantos.productapi.service.exception.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ProductService {
@@ -31,6 +33,35 @@ public class ProductService {
         product.setSupplier(sup);
         return productRepository.save(product);
     }
+
+    public List<Product> getAll () {
+        return productRepository.findAll();
+    }
+
+    public List<Product> getName (String name) {
+        List<Product> list = productRepository.findByNameIgnoreCaseContaining(name);
+
+        return list;
+    }
+
+    public List<Product> getBySupplierId(Long id) {
+        List<Product> list = productRepository.findBySupplierId(id);
+        if (list.isEmpty()) {
+            throw new ObjectNotFoundException("This SupplierId " + id + " not aready exists in the Database");
+        }
+        return list;
+    }
+
+    public List<Product> getByCategoryId(Long id) {
+        List<Product> list = productRepository.findByCategoryId(id);
+        if (list.isEmpty()) {
+            throw new ObjectNotFoundException("This CategoryId " + id + "not aready exists in the Database");
+        }
+
+        return list;
+    }
+
+
 
 
 }

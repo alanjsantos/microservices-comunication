@@ -15,10 +15,7 @@ import java.time.LocalDateTime;
 public class ProductResponse {
 
     private Long id;
-
-    @NotBlank(message = "The Supplier description was not informed.")
     private String name;
-
     private CategoryDTO category;
     private SupplierDTO supplier;
 
