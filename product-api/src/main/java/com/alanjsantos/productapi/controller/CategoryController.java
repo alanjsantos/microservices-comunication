@@ -26,14 +26,14 @@ public class CategoryController {
 
     @PostMapping
     public ResponseEntity<CategoryDTO> save (@Valid @RequestBody CategoryDTO dto) {
-        Category category = service.save(modelMapper.map(dto, Category.class));
+        var category = service.save(modelMapper.map(dto, Category.class));
 
         return ResponseEntity.status(HttpStatus.CREATED).body(modelMapper.map(category, CategoryDTO.class));
     }
 
     @GetMapping
     public ResponseEntity<List<CategoryDTO>> getAll () {
-        List<CategoryDTO> body =
+        var body =
                 service.getAll().stream()
                         .map(entity -> modelMapper.map(entity, CategoryDTO.class))
                         .collect(Collectors.toList());
@@ -43,19 +43,34 @@ public class CategoryController {
 
     @GetMapping("{id}")
     public ResponseEntity<CategoryDTO> getId(@PathVariable Long id) {
-        Category category = service.getById(id);
-        CategoryDTO dto = modelMapper.map(category, CategoryDTO.class);
+        var category = service.getById(id);
+        var dto = modelMapper.map(category, CategoryDTO.class);
         return ResponseEntity.ok().body(dto);
     }
 
     @GetMapping("description/{description}")
     public ResponseEntity<?> getByDescription(@Valid @PathVariable String description) {
-        List<CategoryDTO> body =
+        var body =
                 service.getNameDescription(description).stream()
                         .map(entity -> modelMapper.map(entity, CategoryDTO.class))
                         .collect(Collectors.toList());
 
         return ResponseEntity.ok().body(body);
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<CategoryDTO> update (@Valid @RequestBody CategoryDTO dto, @PathVariable Long id) {
+        dto.setId(id);
+        var category =
+                service.update(modelMapper.map(dto, Category.class));
+        return ResponseEntity.ok(modelMapper.map(category, CategoryDTO.class));
+    }
+
+    @DeleteMapping("{id}")
+    public ResponseEntity<CategoryDTO> delete (@PathVariable Long id) {
+        service.delete(id);
+
+        return ResponseEntity.noContent().build();
     }
 }
 

@@ -19,4 +19,6 @@ spring:
       ddl-auto: update
       format_sql: true
     show-sql: true
+  main:
+    allow-circular-references: true
 

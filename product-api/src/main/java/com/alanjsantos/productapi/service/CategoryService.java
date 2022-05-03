@@ -1,15 +1,13 @@
 package com.alanjsantos.productapi.service;
 
 import com.alanjsantos.productapi.model.Category;
-import com.alanjsantos.productapi.model.dto.CategoryDTO;
 import com.alanjsantos.productapi.repository.CategoryRepository;
+import com.alanjsantos.productapi.service.exception.DataIntegrityException;
 import com.alanjsantos.productapi.service.exception.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 @Service
 public class CategoryService {
@@ -17,14 +15,17 @@ public class CategoryService {
     @Autowired
     private CategoryRepository repository;
 
+    @Autowired
+    private ProductService productService;
+
     public List<Category> getAll() {
         return repository.findAll();
     }
 
     public Category getById(Long id) {
-        Optional<Category> obj =
+        var obj =
                 repository.findById(id);
-        return obj.orElseThrow(() -> new ObjectNotFoundException("ID" + id + "This ID not aready exists in the Database"));
+        return obj.orElseThrow(() -> new ObjectNotFoundException("The ID " + " this Category not aready exists in the Database"));
     }
 
     public Category save (Category category) {
@@ -33,12 +34,27 @@ public class CategoryService {
     }
 
     public List<Category> getNameDescription(String description) {
-        List<Category> list = repository.findByDescriptionIgnoreCaseContaining(description);
+        var list = repository.findByDescriptionIgnoreCaseContaining(description);
         if (list.isEmpty()) {
             throw new ObjectNotFoundException("This description -> " + description + " not aready exists in the Database");
         }
 
         return list;
+    }
+
+    public Category update (Category category) {
+        getById(category.getId());
+        return repository.save(category);
+    }
+
+    public Category delete (Long id) {
+        var category = getById(id);
+        if (productService.existsByCategoryId(id)) {
+            throw new DataIntegrityException("You cannot delete this supplier because it's already defined by a product.");
+        }
+        repository.deleteById(id);
+
+        return category;
     }
 
 }

@@ -1,10 +1,7 @@
 package com.alanjsantos.productapi.controller;
 
 import com.alanjsantos.productapi.model.Product;
-import com.alanjsantos.productapi.model.dto.CategoryDTO;
-import com.alanjsantos.productapi.model.dto.ProductDTO;
-import com.alanjsantos.productapi.model.dto.ProductResponse;
-import com.alanjsantos.productapi.model.dto.SupplierDTO;
+import com.alanjsantos.productapi.model.dto.*;
 import com.alanjsantos.productapi.service.ProductService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +25,7 @@ public class ProductController {
 
     @PostMapping
     public ResponseEntity<?> save (@Valid @RequestBody ProductDTO dto) {
-        Product product =
+        var product =
                 service.save(modelMapper.map(dto, Product.class));
 
         return ResponseEntity.status(HttpStatus.CREATED).body(modelMapper.map(product, ProductResponse.class));
@@ -36,7 +33,7 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<?> getAll () {
-        List<ProductResponse> body =
+        var body =
                 service.getAll()
                         .stream()
                         .map(entity -> modelMapper.map(entity, ProductResponse.class))
@@ -45,9 +42,17 @@ public class ProductController {
         return ResponseEntity.ok(body);
     }
 
+    @GetMapping("{id}")
+    public ResponseEntity<ProductResponse> getId(@PathVariable Long id) {
+        var product = service.getId(id);
+        var dto = modelMapper.map(product, ProductResponse.class);
+
+        return ResponseEntity.ok().body(dto);
+    }
+
     @GetMapping("name/{name}")
     public ResponseEntity<?> getByName(@PathVariable String name) {
-        List<ProductDTO> body =
+        var body =
                 service.getName(name).stream()
                         .map(entity -> modelMapper.map(entity, ProductDTO.class))
                         .collect(Collectors.toList());
@@ -56,7 +61,7 @@ public class ProductController {
 
     @GetMapping("supplierId/{id}")
     public ResponseEntity<?> getBySupplierId(@PathVariable Long id) {
-        List<SupplierDTO> body =
+        var body =
                 service.getBySupplierId(id).stream()
                         .map(entity -> modelMapper.map(entity, SupplierDTO.class))
                         .collect(Collectors.toList());
@@ -65,12 +70,26 @@ public class ProductController {
 
     @GetMapping("categoryId/{id}")
     public ResponseEntity<?> getByCategoryId(@PathVariable Long id) {
-        List<CategoryDTO> body =
+        var body =
                 service.getByCategoryId(id).stream()
                         .map(entity -> modelMapper.map(entity, CategoryDTO.class))
                         .collect(Collectors.toList());
 
         return ResponseEntity.ok().body(body);
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<?> update(@Valid @RequestBody ProductDTO dto, @PathVariable Long id) {
+        dto.setId(id);
+        var product = service.update(modelMapper.map(dto, Product.class));
+
+        return ResponseEntity.ok().body(modelMapper.map(product, ProductResponse.class));
+    }
+
+    @DeleteMapping("{id}")
+    public ResponseEntity<ProductDTO> delete (@PathVariable Long id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
 

@@ -26,22 +26,22 @@ public class SupplierController {
 
     @PostMapping
     public ResponseEntity<SupplierDTO> save (@Valid @RequestBody SupplierDTO dto) {
-        Supplier supplier =
+        var supplier =
                 service.save(modelMapper.map(dto, Supplier.class));
         return ResponseEntity.status(HttpStatus.CREATED).body(modelMapper.map(supplier, SupplierDTO.class));
     }
 
     @GetMapping("{id}")
     public ResponseEntity<SupplierDTO> getId (@PathVariable Long id) {
-        Supplier supplier = service.getById(id);
-        SupplierDTO dto = modelMapper.map(supplier, SupplierDTO.class);
+        var supplier = service.getById(id);
+        var dto = modelMapper.map(supplier, SupplierDTO.class);
 
         return ResponseEntity.ok(dto);
     }
 
     @GetMapping
     public ResponseEntity<List<SupplierDTO>> getAll () {
-        List<SupplierDTO> body =
+        var body =
                 service.getAll().stream()
                         .map(entity -> modelMapper.map(entity, SupplierDTO.class))
                         .collect(Collectors.toList());
@@ -51,12 +51,27 @@ public class SupplierController {
 
     @GetMapping("name/{name}")
     public ResponseEntity<?> getByName(@PathVariable String name) {
-        List<SupplierDTO> body =
+        var body =
                 service.getName(name).stream()
                         .map(entity -> modelMapper.map(entity, SupplierDTO.class))
                         .collect(Collectors.toList());
 
         return ResponseEntity.ok().body(body);
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<SupplierDTO> update (@Valid @RequestBody SupplierDTO dto, @PathVariable Long id) {
+        dto.setId(id);
+        var supplier =
+                service.save(modelMapper.map(dto, Supplier.class));
+        return ResponseEntity.ok(modelMapper.map(supplier, SupplierDTO.class));
+    }
+
+    @DeleteMapping("{id}")
+    public ResponseEntity<SupplierDTO> delete(@PathVariable Long id) {
+        service.delete(id);
+
+        return ResponseEntity.noContent().build();
     }
 
 
