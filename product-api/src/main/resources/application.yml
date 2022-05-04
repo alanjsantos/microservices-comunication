@@ -22,3 +22,7 @@ spring:
   main:
     allow-circular-references: true
 
+app-config:
+  secrets:
+    api-secret: ${API_SECRET:YXV0aC1hcGktc2VjcmV0LWRldg==}
+

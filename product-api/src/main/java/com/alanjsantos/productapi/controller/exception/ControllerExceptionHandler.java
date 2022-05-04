@@ -1,5 +1,6 @@
 package com.alanjsantos.productapi.controller.exception;
 
+import com.alanjsantos.productapi.service.exception.AuthenticationException;
 import com.alanjsantos.productapi.service.exception.DataIntegrityException;
 import com.alanjsantos.productapi.service.exception.ObjectNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,13 @@ public class ControllerExceptionHandler {
         StandardError err = new StandardError(HttpStatus.BAD_REQUEST.value(),  e.getMessage());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<StandardError> authentication (AuthenticationException e){
+        StandardError err = new StandardError(HttpStatus.UNAUTHORIZED.value(),  e.getMessage());
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(err);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
