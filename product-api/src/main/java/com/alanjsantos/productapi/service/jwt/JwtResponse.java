@@ -1,5 +1,6 @@
 package com.alanjsantos.productapi.service.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,11 +19,7 @@ public class JwtResponse {
 
     public static JwtResponse getUser(Claims jwtCalims) {
         try {
-            return JwtResponse.builder()
-                    .id((Long) jwtCalims.get("id"))
-                    .name((String) jwtCalims.get("name"))
-                    .email((String) jwtCalims.get("email"))
-                    .build();
+            return new ObjectMapper().convertValue(jwtCalims.get("authUser"), JwtResponse.class);
         } catch (Exception e) {
             e.getStackTrace();
             return null;
