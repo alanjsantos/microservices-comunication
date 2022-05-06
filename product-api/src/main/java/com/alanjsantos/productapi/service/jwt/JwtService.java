@@ -13,7 +13,7 @@ public class JwtService {
     private static final String EMPTY_SPACE = " ";
     private static final Integer TOKEN_INDEX = 1;
 
-    @Value("{app-config.secrets.api-secret}")
+    @Value("${app-config.secrets.api-secret}")
     private String apiSecret;
 
     public void validateAuthorization (String token) {
