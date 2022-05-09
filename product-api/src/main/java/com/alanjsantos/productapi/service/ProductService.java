@@ -1,6 +1,7 @@
 package com.alanjsantos.productapi.service;
 
 import com.alanjsantos.productapi.model.Product;
+import com.alanjsantos.productapi.model.dto.ProductStockDTO;
 import com.alanjsantos.productapi.repository.ProductRepository;
 import com.alanjsantos.productapi.service.exception.DataIntegrityException;
 import com.alanjsantos.productapi.service.exception.ObjectNotFoundException;
@@ -89,6 +90,9 @@ public class ProductService {
         return product;
     }
 
+    public void updateProductStock(ProductStockDTO dto) {
+
+    }
 
 
 }
