@@ -11,6 +11,6 @@ import java.util.List;
 @NoArgsConstructor
 public class ProductStockDTO {
 
-    private String salesID;
+    private String salesId;
     private List<ProductQuantityDTO> products;
 }
