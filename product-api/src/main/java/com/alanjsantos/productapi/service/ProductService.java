@@ -1,15 +1,24 @@
 package com.alanjsantos.productapi.service;
 
 import com.alanjsantos.productapi.model.Product;
+import com.alanjsantos.productapi.model.dto.ProductQuantityDTO;
 import com.alanjsantos.productapi.model.dto.ProductStockDTO;
 import com.alanjsantos.productapi.repository.ProductRepository;
+import com.alanjsantos.productapi.sales.dto.SalesConfirmationDTO;
+import com.alanjsantos.productapi.sales.enums.SalesStatus;
+import com.alanjsantos.productapi.sales.rabbitmq.SalesConfirmationSender;
 import com.alanjsantos.productapi.service.exception.DataIntegrityException;
 import com.alanjsantos.productapi.service.exception.ObjectNotFoundException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static org.springframework.util.ObjectUtils.isEmpty;
+
+@Slf4j
 @Service
 public class ProductService {
 
@@ -21,6 +30,9 @@ public class ProductService {
 
     @Autowired
     private CategoryService categoryService;
+
+    @Autowired
+    private SalesConfirmationSender salesConfirmationSender;
 
     public Product save (Product product) {
         var sup = supplierService.getById(product.getSupplier().getId());
@@ -90,9 +102,54 @@ public class ProductService {
         return product;
     }
 
-    public void updateProductStock(ProductStockDTO dto) {
+    public void updateProductStock(ProductStockDTO dto) throws JsonProcessingException {
+        try {
+            validateStockUpdateData(dto);
+            updateSotck(dto);
+        } catch (Exception e) {
+            log.error("Error while trying to update sotkc for mesage with error: {}", e.getMessage(), e);
+            var rejectdMessage = new SalesConfirmationDTO(dto.getSalesId(), SalesStatus.REJECTED);
+            salesConfirmationSender.sendSalesConfirmationMessage(rejectdMessage);
+        }
+    }
+    //fluxo de atualizacao e devolucao da respota
 
+    private void validateStockUpdateData(ProductStockDTO dto) {
+        if (isEmpty(dto) || isEmpty(dto.getSalesId())) {
+            throw new DataIntegrityException("The Product data and sales ID must be informed.");
+        }
+        if (isEmpty(dto.getProducts())) {
+            throw new DataIntegrityException("The sales products must be informed.");
+        }
+        dto.getProducts()
+                .forEach( salesProduct -> {
+                    if (isEmpty(salesProduct.getQuantity()) || isEmpty(salesProduct.getProductId())) {
+                        throw new DataIntegrityException("The productID and the quantity must be informed");
+                    }
+                });
     }
 
+    private void updateSotck (ProductStockDTO dto) {
+        dto.getProducts()
+                .forEach(salesProduct -> {
+                    var existsProduct = getId(salesProduct.getProductId());
+                    validateQuantityInStock(salesProduct, existsProduct);
+                    existsProduct.updateStock(salesProduct.getQuantity());
+                    productRepository.save(existsProduct);
+                    var approvedMessage = new SalesConfirmationDTO(dto.getSalesId(), SalesStatus.APPROVED);
+                    try {
+                        salesConfirmationSender.sendSalesConfirmationMessage(approvedMessage);
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                    }
+                });
+    }
+
+    private void validateQuantityInStock(ProductQuantityDTO salesProduct,
+                                         Product existsProduct) {
+        if (salesProduct.getQuantity() > existsProduct.getQuantityAvailable()) {
+            throw new DataIntegrityException(String.format("The product %s is out of stock.", existsProduct.getId()));
+        }
+    }
 
 }

@@ -39,4 +39,8 @@ public class Product {
     public void prePersist() {
         createdAt = LocalDateTime.now();
     }
+
+    public void updateStock(Integer quantity) {
+        quantityAvailable -=  quantity;
+    }
 }
