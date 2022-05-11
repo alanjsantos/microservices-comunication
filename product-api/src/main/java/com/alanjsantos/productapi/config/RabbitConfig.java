@@ -43,12 +43,14 @@ public class RabbitConfig {
         return new Queue(salesConfirmationMq, true);
     }
 
+    @Bean
     public Binding productSotckMqBinding(TopicExchange topicExchange) {
         return BindingBuilder
                 .bind(productSotckMq())
                 .to(topicExchange)
                 .with(productStockKey);
     }
+    @Bean
     public Binding salesConfirmationMqBinding(TopicExchange topicExchange) {
         return BindingBuilder
                 .bind(salesConfirmationMq())
