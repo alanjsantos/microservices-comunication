@@ -13,7 +13,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.util.ObjectUtils.isEmpty;
@@ -129,20 +131,21 @@ public class ProductService {
                 });
     }
 
-    private void updateSotck (ProductStockDTO dto) {
+    @Transactional
+    private void updateSotck (ProductStockDTO dto) throws JsonProcessingException {
+        var productsForUpdate = new ArrayList<Product>();
         dto.getProducts()
                 .forEach(salesProduct -> {
                     var existsProduct = getId(salesProduct.getProductId());
                     validateQuantityInStock(salesProduct, existsProduct);
                     existsProduct.updateStock(salesProduct.getQuantity());
-                    productRepository.save(existsProduct);
-                    var approvedMessage = new SalesConfirmationDTO(dto.getSalesId(), SalesStatus.APPROVED);
-                    try {
-                        salesConfirmationSender.sendSalesConfirmationMessage(approvedMessage);
-                    } catch (JsonProcessingException e) {
-                        e.printStackTrace();
-                    }
+                    productsForUpdate.add(existsProduct);
                 });
+        if (!isEmpty(productsForUpdate)) {
+            productRepository.saveAll(productsForUpdate);
+            var approvedMessage = new SalesConfirmationDTO(dto.getSalesId(), SalesStatus.APPROVED);
+            salesConfirmationSender.sendSalesConfirmationMessage(approvedMessage);
+        }
     }
 
     private void validateQuantityInStock(ProductQuantityDTO salesProduct,
