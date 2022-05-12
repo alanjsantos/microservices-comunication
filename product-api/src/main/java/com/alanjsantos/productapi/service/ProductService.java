@@ -1,16 +1,21 @@
 package com.alanjsantos.productapi.service;
 
+import com.alanjsantos.productapi.controller.exception.ErrorGenericException;
 import com.alanjsantos.productapi.model.Product;
 import com.alanjsantos.productapi.model.dto.ProductQuantityDTO;
+import com.alanjsantos.productapi.model.dto.ProductSalesResponse;
 import com.alanjsantos.productapi.model.dto.ProductStockDTO;
 import com.alanjsantos.productapi.repository.ProductRepository;
+import com.alanjsantos.productapi.sales.client.SalesClient;
 import com.alanjsantos.productapi.sales.dto.SalesConfirmationDTO;
+import com.alanjsantos.productapi.sales.dto.SalesProductResponseDTO;
 import com.alanjsantos.productapi.sales.enums.SalesStatus;
 import com.alanjsantos.productapi.sales.rabbitmq.SalesConfirmationSender;
 import com.alanjsantos.productapi.service.exception.DataIntegrityException;
 import com.alanjsantos.productapi.service.exception.ObjectNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +40,12 @@ public class ProductService {
 
     @Autowired
     private SalesConfirmationSender salesConfirmationSender;
+
+    @Autowired
+    private SalesClient salesClient;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     public Product save (Product product) {
         var sup = supplierService.getById(product.getSupplier().getId());
@@ -152,6 +163,17 @@ public class ProductService {
                                          Product existsProduct) {
         if (salesProduct.getQuantity() > existsProduct.getQuantityAvailable()) {
             throw new DataIntegrityException(String.format("The product %s is out of stock.", existsProduct.getId()));
+        }
+    }
+
+    public ProductSalesResponse findProductSales (Long id) {
+        var product = getId(id);
+        try {
+            salesClient.getSalesByProductId(product.getId()).orElseThrow(() ->
+                    new ObjectNotFoundException("The sales was not found by this product."));
+            return modelMapper.map(product, ProductSalesResponse.class);
+        } catch (Exception e) {
+            throw new ErrorGenericException("There was an error trying to get the product's sales.");
         }
     }
 

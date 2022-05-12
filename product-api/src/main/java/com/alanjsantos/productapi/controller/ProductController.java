@@ -92,5 +92,13 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("{id}/sales")
+    public ResponseEntity<?> findProductSales(@PathVariable Long id) {
+        var client = service.findProductSales(id);
+        return ResponseEntity.ok().body(client);
+    }
+
+
+
 
 }
