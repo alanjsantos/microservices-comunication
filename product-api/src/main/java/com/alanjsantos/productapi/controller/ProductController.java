@@ -92,6 +92,12 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("check-stock")
+    public ResponseEntity<?> checkProductStock(@RequestBody ProductCheckStockResquest resquest) {
+        var checkRequest = service.checkProductStock(resquest);
+        return ResponseEntity.ok().body(checkRequest);
+    }
+
     @GetMapping("{id}/sales")
     public ResponseEntity<?> findProductSales(@PathVariable Long id) {
         var client = service.findProductSales(id);

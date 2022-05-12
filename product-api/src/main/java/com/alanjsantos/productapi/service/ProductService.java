@@ -1,7 +1,9 @@
 package com.alanjsantos.productapi.service;
 
 import com.alanjsantos.productapi.controller.exception.ErrorGenericException;
+import com.alanjsantos.productapi.controller.exception.SuccessResponse;
 import com.alanjsantos.productapi.model.Product;
+import com.alanjsantos.productapi.model.dto.ProductCheckStockResquest;
 import com.alanjsantos.productapi.model.dto.ProductQuantityDTO;
 import com.alanjsantos.productapi.model.dto.ProductSalesResponse;
 import com.alanjsantos.productapi.model.dto.ProductStockDTO;
@@ -173,7 +175,26 @@ public class ProductService {
                     new ObjectNotFoundException("The sales was not found by this product."));
             return modelMapper.map(product, ProductSalesResponse.class);
         } catch (Exception e) {
-            throw new ErrorGenericException("There was an error trying to get the product's sales.");
+            throw new DataIntegrityException("There was an error trying to get the product's sales.");
+        }
+    }
+
+    public SuccessResponse checkProductStock(ProductCheckStockResquest resquest) {
+        if (isEmpty(resquest) || isEmpty(resquest.getProducts())) {
+            throw new DataIntegrityException("The request data must be informed.");
+        }
+        resquest.getProducts()
+                .forEach(this::validateStock);
+        return SuccessResponse.create("The stock is OK!");
+    }
+
+    private void validateStock (ProductQuantityDTO productQuantityDTO) {
+        if (isEmpty(productQuantityDTO.getProductId()) || isEmpty(productQuantityDTO.getQuantity())) {
+            throw new DataIntegrityException("Product ID and quantity must be informed.");
+        }
+        var product = getId(productQuantityDTO.getProductId());
+        if (productQuantityDTO.getQuantity() > product.getQuantityAvailable()) {
+            throw new DataIntegrityException(String.format("The product %s is out of stck", product.getId()));
         }
     }
 
