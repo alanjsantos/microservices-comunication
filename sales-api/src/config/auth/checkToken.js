@@ -1,8 +1,8 @@
 import jwt from "jsonwebtoken";
 import { promisify } from "util";
-import { UNAUTHORIZED, INTERNAL_SERVER_EROR } from "../httpStatus";
 import AuthException from "./AuthException";
-import { API_SECRET } from "../secrets/secrets";
+import { API_SECRET } from "../constants/secrets";
+import * as httpStatus from "../constants/HttpStatus";
 
 const meptySpace = " ";
 
@@ -10,7 +10,10 @@ export default async (req, res, next) => {
   try {
     let { authorization } = req.headers;
     if (!authorization) {
-      throw new AuthException(UNAUTHORIZED, "Access token was not informed");
+      throw new AuthException(
+        httpStatus.UNAUTHORIZED,
+        "Access token was not informed"
+      );
     }
     let accessToken = authorization;
     if (accessToken.includes(meptySpace)) {
@@ -22,7 +25,7 @@ export default async (req, res, next) => {
     req.authUser = decoded.authUser;
     return next();
   } catch (err) {
-    const status = err.status ? err.status : INTERNAL_SERVER_EROR;
+    const status = err.status ? err.status : httpStatus.INTERNAL_SERVER_EROR;
     return res.status(err.status).json({
       status,
       message: err.message,
