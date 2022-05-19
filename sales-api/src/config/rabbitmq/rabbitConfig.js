@@ -10,8 +10,22 @@ import {
 } from "./queue";
 
 const HALF_SECOND = 500;
+const HALF_MINUTE = 30000;
+const CONTAINER_ENV = "container";
 
 export async function connectRabbitMq() {
+  const env = process.env.NODE_ENV;
+  console.log(env);
+  if (CONTAINER_ENV == env) {
+    console.info("Waiting for RabbitMQ to start...");
+    setInterval(() => {
+      connectRabbitMqAndCreateQueues();
+    }, HALF_MINUTE);
+  }
+  connectRabbitMqAndCreateQueues();
+}
+
+async function connectRabbitMqAndCreateQueues() {
   amqp.connect(RABBIT_MQ_URL, (error, connection) => {
     if (error) {
       throw error;
